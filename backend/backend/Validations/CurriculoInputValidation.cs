@@ -18,7 +18,9 @@ namespace backend.Validations
                 .EmailAddress().WithMessage("O email é inválido.");
 
             RuleFor(x => x.Telefone)
-                .NotEmpty().WithMessage("O telefone é obrigatório.");
+                .NotEmpty().WithMessage("O telefone é obrigatório.")
+                .Matches(@"^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$")
+                .WithMessage("O telefone informado não é válido.");
 
             RuleFor(x => x.CargoDesejado)
                 .NotEmpty().WithMessage("O cargo desejado é obrigatório.");
@@ -29,7 +31,7 @@ namespace backend.Validations
             RuleFor(x => x.Arquivo)
                 .NotNull().WithMessage("O arquivo é obrigatório.")
                 .Must(BeAValidFileType).WithMessage("O arquivo deve ser PDF, DOC ou DOCX.")
-                .Must(f => f.Length <= 5 * 1024 * 1024).WithMessage("O arquivo não pode ter mais de 5MB."); // tamanho máximo opcional
+                .Must(f => f.Length <= 1 * 1024 * 1024).WithMessage("O arquivo não pode ter mais de 1MB.");
         }
 
         private bool BeAValidFileType(IFormFile file)

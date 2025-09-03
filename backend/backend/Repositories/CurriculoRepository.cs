@@ -1,17 +1,20 @@
 ﻿using backend.Context;
 using backend.Models;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Repositories
 {
-    public class CurriculoRepository(AppDbContext context) : ICurriculoRepository
+    public class CurriculoRepository(AppDbContext context, IValidator<CurriculoInput> validator) : ICurriculoRepository
     {
         private readonly AppDbContext _context = context;
-
+        private readonly IValidator<CurriculoInput> _validator = validator;
         public async Task Adicionar(CurriculoInput input)
         {
             var bytes = ToByteArray(input.Arquivo);
             string nomeArquivo = input.Arquivo.FileName;
+
+            ValidarInput(input);
 
             var curriculo = new Curriculo
             { 
@@ -45,6 +48,13 @@ namespace backend.Repositories
         {
             var curriculos = await _context.Curriculos.ToListAsync();
             return curriculos;
+        }
+
+        private void ValidarInput(CurriculoInput input)
+        {
+            var validationResult = _validator.Validate(input);
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
         }
     }
 }
