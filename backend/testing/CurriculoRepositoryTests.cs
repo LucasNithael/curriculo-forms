@@ -1,8 +1,11 @@
 ﻿using backend.Context;
 using backend.Models;
 using backend.Repositories;
+using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 
 namespace backend.Tests
 {
@@ -17,7 +20,6 @@ namespace backend.Tests
             return new AppDbContext(options);
         }
 
-
         private IFormFile GetTestFile()
         {
             var content = "Teste de conteúdo do arquivo";
@@ -31,12 +33,20 @@ namespace backend.Tests
             };
         }
 
+        private IValidator<CurriculoInput> GetMockValidator()
+        {
+            var mock = new Mock<IValidator<CurriculoInput>>();
+            mock.Setup(v => v.Validate(It.IsAny<CurriculoInput>()))
+                .Returns(new ValidationResult()); // sempre válido
+            return mock.Object;
+        }
+
         [Fact]
         public async Task Adicionar_DeveAdicionarCurriculo()
         {
             // Arrange
             var context = GetDbContext();
-            var repo = new CurriculoRepository(context);
+            var repo = new CurriculoRepository(context, GetMockValidator());
 
             var input = new CurriculoInput
             {
@@ -64,9 +74,8 @@ namespace backend.Tests
         {
             // Arrange
             var context = GetDbContext();
-            var repo = new CurriculoRepository(context);
+            var repo = new CurriculoRepository(context, GetMockValidator());
 
-            // Adicionando dois currículos
             await repo.Adicionar(new CurriculoInput
             {
                 Nome = "Lucas",
