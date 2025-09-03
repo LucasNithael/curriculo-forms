@@ -25,8 +25,19 @@ const errors = reactive({
 const submitted = ref(false)
 
 function handleFileUpload(event) {
-  form.arquivo = event.target.files[0]
-  errors.arquivo = false
+  const file = event.target.files[0]
+  if (file) {
+    const maxSize = 1024 * 1024 // 1 MB
+    if (file.size > maxSize) {
+      alert("O arquivo deve ter no máximo 1MB.")
+      event.target.value = "" // limpa o input
+      form.arquivo = null
+      errors.arquivo = true
+      return
+    }
+    form.arquivo = file
+    errors.arquivo = false
+  }
 }
 
 function validateForm() {
@@ -118,9 +129,14 @@ async function submitForm() {
           </svg>
           <span class="text-gray-700">Escolher arquivo</span>
         </label>
-        <span class="text-sm">
+        <div class="text-sm text-gray-500 mt-1 flex justify-between">
+          <span>
             (.doc, .docx ou .pdf)
-        </span>
+          </span>
+          <span>
+            máximo 1MB
+          </span>
+        </div>
         <input id="file" type="file" @change="handleFileUpload" class="hidden" accept=".pdf,.doc,.docx"/>
         <p v-if="form.arquivo" class="mt-2 text-sm text-gray-600">Arquivo selecionado: <span class="font-medium">{{ form.arquivo.name }}</span></p>
       </div>
